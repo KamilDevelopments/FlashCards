@@ -1,4 +1,4 @@
-package com.kamildevelopments.myapplication.ui.theme
+package com.kamildevelopments.flashcards.ui.theme
 
 import android.app.Activity
 import android.os.Build

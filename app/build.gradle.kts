@@ -1,14 +1,17 @@
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
+    id("com.google.devtools.ksp")
+
 }
 
 android {
-    namespace = "com.kamildevelopments.myapplication"
+    namespace = "com.kamildevelopments.flashcards"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.kamildevelopments.myapplication"
+        applicationId = "com.kamildevelopments.flashcards"
         minSdk = 28
         targetSdk = 34
         versionCode = 1
@@ -53,7 +56,10 @@ android {
 }
 
 dependencies {
-
+    val room_version = "2.6.1"
+    implementation("androidx.room:room-runtime:$room_version")
+    implementation ("androidx.room:room-ktx:$room_version")
+    ksp("androidx.room:room-compiler:$room_version")
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.activity.compose)

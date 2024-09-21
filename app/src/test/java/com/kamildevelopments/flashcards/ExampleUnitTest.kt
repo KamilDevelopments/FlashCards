@@ -1,4 +1,4 @@
-package com.kamildevelopments.myapplication
+package com.kamildevelopments.flashcards
 
 import org.junit.Test
 
