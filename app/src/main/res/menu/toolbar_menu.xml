@@ -3,9 +3,19 @@
     xmlns:android="http://schemas.android.com/apk/res/android">
     <!-- Plus icon -->
     <item
+        android:id="@+id/action_download"
+        android:icon="@drawable/baseline_download_24"
+        android:title="Import"
+        app:showAsAction="always" />
+    <item
         android:id="@+id/action_add"
         android:icon="@drawable/baseline_add_24"
-    android:title="Add"
+        android:title="Add"
+        app:showAsAction="always" />
+    <item
+        android:id="@+id/action_check"
+        android:icon="@drawable/baseline_check_24"
+        android:title="Check"
         app:showAsAction="always" />
 
     <!-- Settings icon -->

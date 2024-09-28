@@ -11,11 +11,11 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:text="Q1: What is Android?"
-        android:textStyle="bold"
         android:textSize="16sp"
-        app:layout_constraintTop_toTopOf="parent"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toStartOf="@+id/deleteQuestionButton"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toEndOf="parent" />
+        app:layout_constraintTop_toTopOf="parent" />
 
     <TextView
         android:id="@+id/answerTextView"
@@ -23,8 +23,18 @@
         android:layout_height="wrap_content"
         android:text="A1: Android is a mobile operating system."
         android:textSize="14sp"
-        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintEnd_toStartOf="@+id/deleteQuestionButton"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/questionTextView" />
+
+    <ImageButton
+        android:id="@+id/deleteQuestionButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginEnd="5dp"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:srcCompat="@drawable/baseline_delete_24" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

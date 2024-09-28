@@ -17,6 +17,12 @@ interface FlashcardDao {
 
     @Query("SELECT DISTINCT setName FROM Flashcard")
     suspend fun getAllSets(): List<String>
+
+    @Query("DELETE FROM Flashcard WHERE setName = :setName")
+    suspend fun deleteSetBySetName(setName: String)
+
+    @Query("SELECT COUNT(*) FROM Flashcard WHERE setName = :setName")
+    suspend fun doesSetExist(setName: String): Int
 }
 
 @Database(entities = [Flashcard::class], version = 1)
