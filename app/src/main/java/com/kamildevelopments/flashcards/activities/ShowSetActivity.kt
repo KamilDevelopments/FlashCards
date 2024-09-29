@@ -1,18 +1,16 @@
 package com.kamildevelopments.flashcards.activities
 
+import android.content.Intent
 import android.os.Bundle
-import android.os.PersistableBundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
-import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.LinearSnapHelper
 import androidx.recyclerview.widget.RecyclerView
 import androidx.room.Room
 import com.kamildevelopments.flashcards.R
-import com.kamildevelopments.flashcards.adapters.SetAdapter
 import com.kamildevelopments.flashcards.adapters.ShowSetAdapter
 import com.kamildevelopments.flashcards.database.AppDatabase
 import com.kamildevelopments.flashcards.database.FlashcardDao
@@ -26,7 +24,7 @@ class ShowSetActivity : AppCompatActivity() {
     private lateinit var binding: ActivityShowSetBinding
     private lateinit var flashcardDao: FlashcardDao
     private lateinit var showSetAdapter: ShowSetAdapter
-    private lateinit var snapHelper : LinearSnapHelper
+    private lateinit var snapHelper: LinearSnapHelper
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,13 +34,17 @@ class ShowSetActivity : AppCompatActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setDisplayShowHomeEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.baseline_arrow_back_24)
-        binding.showSetRecyclerView.layoutManager = LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
+        binding.showSetRecyclerView.layoutManager =
+            LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false)
         snapHelper = LinearSnapHelper()
         snapHelper.attachToRecyclerView(binding.showSetRecyclerView)
-        val db = Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flashcard-database").build()
+        val db =
+            Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flashcard-database")
+                .build()
         flashcardDao = db.flashcardDao()
-    loadFlashcards()
+        loadFlashcards()
     }
+
     private fun loadFlashcards() {
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -57,17 +59,19 @@ class ShowSetActivity : AppCompatActivity() {
                 e.printStackTrace()
             }
         }
-        binding.showSetRecyclerView.addOnScrollListener(object: RecyclerView.OnScrollListener(){
+        binding.showSetRecyclerView.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
                 super.onScrollStateChanged(recyclerView, newState)
-                if (newState == RecyclerView.SCROLL_STATE_IDLE){
-                    val centerView = snapHelper.findSnapView(binding.showSetRecyclerView.layoutManager)
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) {
+                    val centerView =
+                        snapHelper.findSnapView(binding.showSetRecyclerView.layoutManager)
                     val pos = binding.showSetRecyclerView.layoutManager!!.getPosition(centerView!!)
                     Log.d("CenterView", "CenterView position: $pos")
                 }
             }
         })
     }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar_menu, menu)
         menu?.findItem(R.id.action_add)?.isVisible = false
@@ -83,6 +87,13 @@ class ShowSetActivity : AppCompatActivity() {
                 finish()
                 true
             }
+
+            R.id.action_settings -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
+                true
+            }
+
             else -> super.onOptionsItemSelected(item)
         }
     }

@@ -38,4 +38,11 @@
         <item name="elevation">4dp</item>
         <item name="android:buttonCornerRadius">8dp</item>
     </style>
+    <style name="IconButtonStyle" parent="Widget.AppCompat.ImageButton">
+
+        <item name="android:backgroundTint">@color/teal_200</item>
+        <item name="android:background">@drawable/icon_button_ripple</item>
+        <item name="android:padding">12dp</item>
+        <item name="android:tint">@color/black</item>
+    </style>
 </resources>

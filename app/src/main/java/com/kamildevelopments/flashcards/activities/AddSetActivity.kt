@@ -1,5 +1,6 @@
-package com.kamildevelopments.flashcards.activities;
+package com.kamildevelopments.flashcards.activities
 
+import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
@@ -32,11 +33,8 @@ class AddSetActivity : AppCompatActivity() {
         supportActionBar?.setDisplayShowHomeEnabled(true)
         supportActionBar?.setHomeAsUpIndicator(R.drawable.baseline_arrow_back_24)
         db = Room.databaseBuilder(
-            applicationContext,
-            AppDatabase::class.java, "flashcard-database"
-        )
-            .fallbackToDestructiveMigration() // Optional for debugging
-            .build()
+            applicationContext, AppDatabase::class.java, "flashcard-database"
+        ).fallbackToDestructiveMigration().build()
         val flashcardAdapter = CustomAdapter(flashcards)
         binding.recyclerView.adapter = flashcardAdapter
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
@@ -50,7 +48,8 @@ class AddSetActivity : AppCompatActivity() {
                 if (exists) {
                     Toast.makeText(this, "This question already exists!", Toast.LENGTH_SHORT).show()
                 } else {
-                    val flashcard = Flashcard(question = question, answer = answer, setName = setName)
+                    val flashcard =
+                        Flashcard(question = question, answer = answer, setName = setName)
                     flashcardAdapter.addFlashcard(flashcard)
                     binding.questionEditText.text.clear()
                     binding.answerEditText.text.clear()
@@ -72,7 +71,7 @@ class AddSetActivity : AppCompatActivity() {
 
             CoroutineScope(Dispatchers.IO).launch {
                 try {
-                     setName = binding.setNameEditText.text.toString()
+                    setName = binding.setNameEditText.text.toString()
                     val setExists = db.flashcardDao().doesSetExist(setName) > 0
 
                     withContext(Dispatchers.Main) {
@@ -106,6 +105,7 @@ class AddSetActivity : AppCompatActivity() {
 
         }
     }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.toolbar_menu, menu)
         menu?.findItem(R.id.action_add)?.isVisible = false
@@ -120,6 +120,7 @@ class AddSetActivity : AppCompatActivity() {
                 finish()
                 true
             }
+
             R.id.action_check -> {
 
                 val flashcardsToSave = flashcards.toList()
@@ -133,7 +134,7 @@ class AddSetActivity : AppCompatActivity() {
                                 "Flashcards saved to database!",
                                 Toast.LENGTH_SHORT
                             ).show()
-                            finish();
+                            finish()
                         }
                     } catch (e: Exception) {
                         withContext(Dispatchers.Main) {
@@ -152,6 +153,8 @@ class AddSetActivity : AppCompatActivity() {
             }
 
             R.id.action_settings -> {
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
                 true
             }
 

@@ -4,11 +4,14 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
+import androidx.appcompat.app.AlertDialog
 import com.kamildevelopments.flashcards.databinding.ActivityMainBinding
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
@@ -29,18 +32,40 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var flashcardDao: FlashcardDao
     private lateinit var setAdapter: SetAdapter
+    private lateinit var sharedPreferences: SharedPreferences
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         setSupportActionBar(binding.toolbar)
+        sharedPreferences =
+            getSharedPreferences("com.kamildevelopments.flashcards", Context.MODE_PRIVATE)
         binding.setRecyclerView.layoutManager = LinearLayoutManager(this)
         val db =
             Room.databaseBuilder(applicationContext, AppDatabase::class.java, "flashcard-database")
                 .build()
         flashcardDao = db.flashcardDao()
         loadSets()
+        showFirstTimeMessage()
+    }
+
+    // Function to show the alert dialog with the first-time message
+    private fun showFirstTimeMessage() {
+        val hasSeenMessage = sharedPreferences.getBoolean("hasSeenMessage", false)
+        if (!hasSeenMessage) {
+            val manager = this.packageManager
+            val info = manager.getPackageInfo(this.packageName, PackageManager.GET_ACTIVITIES)
+            AlertDialog.Builder(this)
+                .setTitle("Welcome to Flashcards App!")
+                .setMessage("Thank you for downloading my app! Here, you can create, edit, and manage your flashcards sets. Enjoy learning!\n Also note that this is Alpha - ${info.longVersionCode} version of the app and it might have some bugs. If you find any, or you want your ideas to appear in the app please message me at \n kamildevelopments@gmail.com      ")
+                .setPositiveButton("Got it") { dialog, _ ->
+                    dialog.dismiss()
+                }
+                .create()
+                .show()
+            sharedPreferences.edit().putBoolean("hasSeenMessage", true).apply()
+        }
 
     }
 
@@ -92,62 +117,117 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun showImportConfirmationDialog(
+        setName: String,
+        numberOfCards: Int,
+        onConfirm: (Boolean) -> Unit
+    ) {
+        val builder = AlertDialog.Builder(this@MainActivity)
+        builder.setTitle("Import Flashcards")
+        builder.setMessage("Set Name: $setName\nNumber of Cards: $numberOfCards\n\nDo you want to import this set?")
+
+        // "Confirm" button
+        builder.setPositiveButton("Confirm") { dialog, _ ->
+            onConfirm(true)
+            dialog.dismiss()
+        }
+
+        // "Cancel" button
+        builder.setNegativeButton("Cancel") { dialog, _ ->
+            onConfirm(false)
+            dialog.dismiss()
+        }
+
+        // Show the dialog
+        builder.create().show()
+    }
+
     private fun importSetFromJson() {
         val clipboard = getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
         val clip = clipboard.primaryClip
 
         if (clip != null && clip.itemCount > 0) {
             val json = clip.getItemAt(0).text.toString()
-
-            // Convert JSON back to Flashcard objects
             val gson = Gson()
             val listType = object : TypeToken<List<Flashcard>>() {}.type
             val flashcards: List<Flashcard> = gson.fromJson(json, listType)
-
-            // Check if the set name already exists
             if (flashcards.isNotEmpty()) {
                 val setName = flashcards[0].setName
+                val numberOfCards = flashcards.size
 
-                CoroutineScope(Dispatchers.IO).launch {
-                    try {
-                        val existingSets = flashcardDao.getAllSets()
+                showImportConfirmationDialog(setName, numberOfCards) { confirmed ->
+                    if (confirmed) {
+                        CoroutineScope(Dispatchers.IO).launch {
+                            try {
+                                val existingSets = flashcardDao.getAllSets()
 
-                        if (existingSets.contains(setName)) {
-                            // Set name already exists, notify the user
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(this@MainActivity, "Set with name '$setName' already exists!", Toast.LENGTH_LONG).show()
-                            }
-                        } else {
-                            // Set name doesn't exist, proceed with insertion
-                            flashcardDao.insertAll(*flashcards.toTypedArray())
-                            Log.d("Import", "Flashcards imported successfully")
+                                if (existingSets.contains(setName)) {
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Set with name '$setName' already exists!",
+                                            Toast.LENGTH_LONG
+                                        ).show()
+                                    }
+                                } else {
+                                    flashcardDao.insertAll(*flashcards.toTypedArray())
+                                    Log.d("Import", "Flashcards imported successfully")
 
-                            withContext(Dispatchers.Main) {
-                                Toast.makeText(this@MainActivity, "Flashcards imported successfully!", Toast.LENGTH_SHORT).show()
-                           loadSets()
+                                    withContext(Dispatchers.Main) {
+                                        Toast.makeText(
+                                            this@MainActivity,
+                                            "Flashcards imported successfully!",
+                                            Toast.LENGTH_SHORT
+                                        ).show()
+                                    }
+                                }
+                            } catch (e: Exception) {
+                                Log.e("Import", "Error importing flashcards: ${e.message}")
+                                e.printStackTrace()
                             }
                         }
-                    } catch (e: Exception) {
-                        Log.e("Import", "Error importing flashcards: ${e.message}")
-                        e.printStackTrace()
+                    } else {
+                        Toast.makeText(this@MainActivity, "Import canceled", Toast.LENGTH_SHORT)
+                            .show()
                     }
                 }
+            } else {
+                Toast.makeText(
+                    this@MainActivity,
+                    "No flashcards found in the JSON",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         } else {
-            Toast.makeText(this@MainActivity, "No JSON found on clipboard", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this@MainActivity, "No JSON found on clipboard", Toast.LENGTH_SHORT)
+                .show()
         }
     }
 
     private fun deleteSetFromDatabase(setName: String) {
-        CoroutineScope(Dispatchers.IO).launch {
-            try {
-                flashcardDao.deleteSetBySetName(setName)
-                loadSets()
-            } catch (e: Exception) {
-                Log.e("Database", "Error deleting set: ${e.message}")
-                e.printStackTrace()
+        val builder = AlertDialog.Builder(this)
+        builder.setTitle("Delete Set")
+        builder.setMessage("Are you sure you want to delete the set: $setName?")
+
+        builder.setPositiveButton("Yes") { _, _ ->
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    flashcardDao.deleteSetBySetName(setName)
+                    loadSets()
+                } catch (e: Exception) {
+                    Log.e("Database", "Error deleting set: ${e.message}")
+                    e.printStackTrace()
+                }
             }
         }
+
+        builder.setNegativeButton("No") { dialog, _ ->
+            dialog.dismiss()
+        }
+
+        val dialog = builder.create()
+        dialog.show()
+
     }
 
     private fun showFlashcardsForSet(setName: String) {
@@ -176,7 +256,8 @@ class MainActivity : AppCompatActivity() {
             }
 
             R.id.action_settings -> {
-
+                val intent = Intent(this, SettingsActivity::class.java)
+                startActivity(intent)
                 true
             }
 
