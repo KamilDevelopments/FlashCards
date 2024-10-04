@@ -11,4 +11,4 @@ This app will soon be available on the Google Play Store. I’ll post the link h
 License  
 This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License. You are free to share and adapt the code for personal or educational use, but you cannot use it for commercial purposes.  
 
-For more details, see the LICENSE file.  
+For more details, see the [LICENSE](License.txt) file.
