@@ -6,7 +6,7 @@ Features:
 🗃️ Manage flashcards with Room Database  
 🎨 Intuitive and user-friendly interface  
   
-This app will soon be available on the Google Play Store. I’ll post the link here once it’s live!
+This app is available on the Google Play Store! Check it out https://play.google.com/store/apps/details?id=com.kamildevelopments.flashcards
 
 License  
 This project is licensed under the Creative Commons Attribution-NonCommercial 4.0 International (CC BY-NC 4.0) License. You are free to share and adapt the code for personal or educational use, but you cannot use it for commercial purposes.  
